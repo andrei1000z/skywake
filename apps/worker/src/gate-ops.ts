@@ -1,5 +1,6 @@
 import { type Aircraft, parseCell } from '@skywake/shared';
 import type { GateCore, GateResult } from './gate-core.js';
+import { ICAO_RE, metarRequest } from './providers/aviationweather.js';
 import { ADSBLOL_ID, callsignRequest, cellRequest, hexRequest, regRequest, routeRequest, squawkRequest } from './providers/adsblol.js';
 
 export const HEX_RE = /^~?[0-9a-f]{6}$/;
@@ -34,8 +35,11 @@ function mergeAircraft(results: GateResult[]): Response {
   return json(JSON.stringify({ provider: ADSBLOL_ID, stale, ts, aircraft: [...byHex.values()] }));
 }
 
-/** Executes one gate operation. `path` is the op name, e.g. "cell". */
-export async function gateOp(core: GateCore, op: string, params: URLSearchParams): Promise<Response> {
+/**
+ * Executes one gate operation. `op` is the op name, e.g. "cell".
+ * `weather` is a separate budget for the weather provider so it never eats the ADS-B budget.
+ */
+export async function gateOp(core: GateCore, op: string, params: URLSearchParams, weather: GateCore = core): Promise<Response> {
   switch (op) {
     case 'cell': {
       const cell = parseCell(params.get('id') ?? '');
@@ -72,8 +76,16 @@ export async function gateOp(core: GateCore, op: string, params: URLSearchParams
       const r = await core.get(routeRequest(cs));
       return r.ok ? json(`{"stale":${r.stale},"route":${r.body}}`) : errorResponse(r);
     }
+    case 'metar': {
+      const icao = (params.get('icao') ?? '').toUpperCase();
+      if (!ICAO_RE.test(icao)) return json('{"error":"bad_icao"}', 400);
+      const r = await weather.get(metarRequest(icao));
+      return r.ok ? json(`{"stale":${r.stale},"metar":${r.body}}`) : errorResponse(r);
+    }
     case 'stats':
       return json(JSON.stringify(core.stats()));
+    case 'weather-stats':
+      return json(JSON.stringify(weather.stats()));
     default:
       return json('{"error":"not_found"}', 404);
   }

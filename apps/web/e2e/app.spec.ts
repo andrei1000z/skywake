@@ -57,8 +57,32 @@ test('theme and language switch', async ({ page }) => {
   await page.getByRole('button', { name: 'Map', exact: true }).click();
   await page.getByRole('radio', { name: 'Dark' }).check({ force: true });
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await page.getByRole('radio', { name: 'Română' }).check({ force: true });
+  await page.getByLabel('Language').selectOption('ro');
   await expect(page.getByRole('button', { name: 'Filtre', exact: true })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ro');
+  await page.getByLabel('Limbă').selectOption('de');
+  await expect(page.getByRole('button', { name: 'Filter', exact: true })).toBeVisible();
+});
+
+test('airport panel shows METAR weather', async ({ page }) => {
+  await page.goto(`${BUCHAREST}&ap=LROP`);
+  const panel = page.locator('[data-panel="airport"]');
+  await expect(panel.getByText('METAR LROP 201630Z')).toBeVisible();
+  await expect(panel.locator('.fltcat-vfr')).toHaveText('VFR');
+  await expect(panel).toContainText('≥ 10 km');
+});
+
+test('aircraft panel shows a credited photo', async ({ page }) => {
+  await page.goto(BUCHAREST);
+  await expect.poll(() => page.locator('.status .strong').innerText(), { timeout: 15_000 }).not.toBe('0');
+  await page.getByRole('button', { name: 'List', exact: true }).click();
+  await page.locator('.ac-table tbody tr').first().click();
+  const fig = page.locator('.ac-photo');
+  await expect(fig).toBeVisible();
+  await expect(fig.locator('figcaption')).toContainText('Test Photographer');
+  const link = fig.locator('figcaption a');
+  await expect(link).toHaveAttribute('href', 'https://www.planespotters.net/photo/1/test');
+  expect(await link.getAttribute('rel')).not.toContain('nofollow');
 });
 
 test('no serious accessibility violations in the main views', async ({ page }) => {

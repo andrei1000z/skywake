@@ -37,10 +37,14 @@ jobs:
       - name: Version from tag
         id: ver
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF#refs/tags/v}"; else V="0.0.0-dev+${GITHUB_SHA::7}"; fi
+          # Untagged builds use the package version with a dev suffix, so versionCode is never 0.
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF#refs/tags/v}"
+          else V="$(node -p "require('./apps/web/package.json').version")-dev.${GITHUB_RUN_NUMBER}+${GITHUB_SHA::7}"; fi
           IFS=. read -r MA MI PA <<< "${V%%[-+]*}"
+          CODE=$(( MA * 10000 + MI * 100 + PA ))
+          (( CODE > 0 )) || { echo "::error::versionCode would be $CODE for $V"; exit 1; }
           echo "name=$V" >> "$GITHUB_OUTPUT"
-          echo "code=$(( MA * 10000 + MI * 100 + PA ))" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
 
       - name: Build web bundle for the app
         run: pnpm --filter @skywake/web build

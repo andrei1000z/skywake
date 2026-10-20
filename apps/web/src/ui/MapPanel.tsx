@@ -1,4 +1,4 @@
-import { type Lang, setLang, t, useLang } from '../lib/i18n';
+import { type Lang, LANGS, setLang, t, useLang } from '../lib/i18n';
 import { newId, setPrefs, type Theme, usePrefs } from '../lib/prefs';
 import type { AltUnit, SpeedUnit, VsUnit } from '../lib/units';
 import { ALT_STOPS, cssRgb, GROUND_RGB } from '../map/colors';
@@ -51,7 +51,14 @@ export function MapPanel({ onClose, getView, onGoTo, notificationState, onReques
         <Segmented<AltUnit> label={t('altitude')} value={p.units.alt} options={[['ft', 'ft'], ['m', 'm']]} onChange={(v) => setPrefs({ units: { ...p.units, alt: v } })} />
         <Segmented<SpeedUnit> label={t('speed')} value={p.units.speed} options={[['kt', 'kt'], ['kmh', 'km/h'], ['mph', 'mph']]} onChange={(v) => setPrefs({ units: { ...p.units, speed: v } })} />
         <Segmented<VsUnit> label={t('vs')} value={p.units.vs} options={[['fpm', 'ft/min'], ['ms', 'm/s']]} onChange={(v) => setPrefs({ units: { ...p.units, vs: v } })} />
-        <Segmented<Lang> label={t('language')} value={lang} options={[['en', 'English'], ['ro', 'Română']]} onChange={setLang} />
+        <label>
+          {t('language')}
+          <select className="input" value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
+            {LANGS.map(([code, name]) => (
+              <option key={code} value={code} lang={code}>{name}</option>
+            ))}
+          </select>
+        </label>
 
         <h3>{t('alerts')}</h3>
         <Toggle label={t('alertsEmergency')} checked={p.alertEmergency} onChange={(v) => { setPrefs({ alertEmergency: v }); if (v) onRequestNotifications(); }} />

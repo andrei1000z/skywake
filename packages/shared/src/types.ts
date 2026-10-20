@@ -85,6 +85,32 @@ export interface RouteInfo {
   provider: string;
 }
 
+/** Latest airport weather observation (NOAA Aviation Weather Center, public domain). */
+export interface Metar {
+  icao: string;
+  /** Observation time, epoch ms. */
+  obsTime: number;
+  raw: string;
+  tempC?: number;
+  dewpointC?: number;
+  /** Degrees true; undefined when variable. */
+  windDir?: number;
+  windKt?: number;
+  gustKt?: number;
+  /** Statute miles; "6+" upstream becomes 6 with visibilityPlus. */
+  visibilitySm?: number;
+  visibilityPlus?: boolean;
+  qnhHpa?: number;
+  /** VFR, MVFR, IFR or LIFR. */
+  category?: string;
+  clouds: { cover: string; baseFt?: number }[];
+}
+
+export interface MetarResponse {
+  stale: boolean;
+  metar: Metar | null;
+}
+
 export interface ApiError {
   error: string;
   retryAfter?: number;

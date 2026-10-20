@@ -26,6 +26,19 @@ This file records what we use, under which licence, and what we do to comply.
 - **airplanes.live:** requires approval for production use. It is not enabled.
 - **Commercial trackers** (Flightradar24, FlightAware, etc.): proprietary. We use none of their data, code, icons or branding.
 
-## Aircraft photos
+## Aircraft photos: Planespotters.net
 
-Not shown yet. Any future photo source will be added here before it ships, with its licence and attribution rules.
+- **Source:** the free [Planespotters.net photo API](https://www.planespotters.net/photo/api) (`api.planespotters.net/pub/photos/hex/{hex}`).
+- **Terms we follow:** requests come from the visitor's browser (the API checks Origin/Referer). The photographer is credited
+  under every photo. The image and the credit link to the photo page with a plain link (no `rel="nofollow"`).
+  Photos are free for all users, never a paid feature. Each aircraft is requested at most once per session, and the API is never polled.
+- **Copyright:** photos stay © their photographers. Skywake does not copy, store or re-host them.
+- **Privacy:** when you open an aircraft, your browser asks Planespotters.net for that aircraft's photo. That request carries your IP
+  address and the aircraft's ICAO hex, and Planespotters.net handles it under its own privacy policy.
+
+## Airport weather: NOAA Aviation Weather Center
+
+- **Source:** [aviationweather.gov data API](https://aviationweather.gov/data/api/) (`/api/data/metar`). US government work, public domain.
+- **Limits we respect:** the published limit is 100 requests/min. The Worker gives weather its own budget of at most 20/min,
+  caches each airport for 10 minutes, and sends an identifying User-Agent. The API has no CORS, so browsers cannot call it directly.
+- Shown as "not for flight planning".

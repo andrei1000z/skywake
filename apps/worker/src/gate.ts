@@ -9,6 +9,7 @@ import type { Env } from './env.js';
  */
 export class UpstreamGate extends DurableObject<Env> {
   private core: GateCore;
+  private weather: GateCore;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -24,10 +25,12 @@ export class UpstreamGate extends DurableObject<Env> {
       Date.now,
       env.USER_AGENT || undefined,
     );
+    // aviationweather.gov allows 100 req/min; METARs are cached 10 min, so a fifth of that is plenty.
+    this.weather = new GateCore({ rps: 0.5, burst: 3, perMinute: 20, perDay: 0 }, fetch.bind(globalThis), Date.now, env.USER_AGENT || undefined);
   }
 
   override async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    return gateOp(this.core, url.pathname.slice(1), url.searchParams);
+    return gateOp(this.core, url.pathname.slice(1), url.searchParams, this.weather);
   }
 }

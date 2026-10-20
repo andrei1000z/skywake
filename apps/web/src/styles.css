@@ -326,3 +326,17 @@ h1, h2, h3 { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Aircraft photo (Planespotters.net, credited) */
+.ac-photo { margin: 0 0 12px; border-radius: 10px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--line); }
+.ac-photo img { display: block; width: 100%; height: auto; aspect-ratio: auto; object-fit: cover; max-height: 220px; background: var(--surface-2); }
+.ac-photo figcaption { font-size: 11.5px; color: var(--muted); padding: 5px 8px; background: var(--surface-solid); }
+
+/* METAR */
+.metar-raw { font-size: 12px; background: var(--surface-2); border-radius: 6px; padding: 6px 8px; margin: 10px 0 0; overflow-wrap: anywhere; }
+.sub-section h3 .badge { margin-left: 8px; vertical-align: 1px; }
+.fltcat { color: #fff; border: 0; }
+.fltcat-vfr { background: #1f8f4e; }
+.fltcat-mvfr { background: #2563eb; }
+.fltcat-ifr { background: #c2410c; }
+.fltcat-lifr { background: #a21caf; }

@@ -28,7 +28,8 @@
 - **Airports** layer, airport panel with nearby traffic, and a sortable list of aircraft in view.
 - **Alerts** for emergency squawks (7500/7600/7700) and for a personal watchlist, while the app is open (see [limitations](#honest-limitations)).
 - **Trails** for the selected aircraft, plus follow mode, shareable deep links and bookmarks.
-- **Light and dark** themes, metric or imperial units, and English and Romanian.
+- **Light and dark** themes, metric or imperial units, and six languages (English, Romanian, German, French, Spanish, Italian).
+- **Aircraft photos** from Planespotters.net (photographer credited) and **airport weather** (METAR) from NOAA.
 - **Installable:** PWA on desktop and phone, plus a native Android app.
 - **Accessible:** keyboard navigation, screen-reader labels and reduced-motion support. axe checks run in CI.
 

@@ -42,5 +42,14 @@ export function fmtAge(ms: number): string {
   const s = Math.max(0, Math.round(ms / 1000));
   if (s < 60) return `${s}s`;
   const m = Math.floor(s / 60);
-  return `${m}m ${s % 60}s`;
+  if (m < 60) return `${m}m ${s % 60}s`;
+  return `${Math.floor(m / 60)}h ${m % 60}m`;
+}
+
+/** METAR visibility (statute miles) in km; "6+" (≥ 6 SM) is the usual "10 km or more". */
+export function fmtVisibility(sm: number | undefined, plus?: boolean): string {
+  if (sm === undefined) return '—';
+  if (plus && sm >= 6) return '≥ 10 km';
+  const km = sm * 1.609344;
+  return `${km < 5 ? nf1.format(km) : nf0.format(km)} km${plus ? '+' : ''}`;
 }

@@ -1,12 +1,13 @@
 import type { HealthResponse } from '@skywake/shared';
 import type { Env } from './env.js';
 import { ADSBLOL_ID } from './providers/adsblol.js';
+import { AWC_ID } from './providers/aviationweather.js';
 
 /** Origins every deployment accepts: local dev and the Capacitor Android WebView. */
 const BUILTIN_ORIGINS = ['http://localhost:5173', 'http://localhost:4173', 'https://localhost', 'capacitor://localhost'];
 
 /** Seconds a successful response may sit in the Cloudflare edge cache / browser. */
-const EDGE_TTL: Record<string, number> = { cell: 4, hex: 3, search: 10, emergencies: 20, route: 3600 };
+const EDGE_TTL: Record<string, number> = { cell: 4, hex: 3, search: 10, emergencies: 20, route: 3600, metar: 300 };
 
 export interface CacheLike {
   match(req: Request): Promise<Response | undefined>;
@@ -58,6 +59,7 @@ export function matchRoute(pathname: string, search: URLSearchParams): Route | n
   if (parts.length === 3 && a === 'cell' && b) return { op: 'cell', params: { id: b } };
   if (parts.length === 3 && a === 'aircraft' && b) return { op: 'hex', params: { hex: b } };
   if (parts.length === 3 && a === 'route' && b) return { op: 'route', params: { callsign: b } };
+  if (parts.length === 3 && a === 'metar' && b) return { op: 'metar', params: { icao: b } };
   if (parts.length === 2 && a === 'search') return { op: 'search', params: { q: search.get('q') ?? '' } };
   if (parts.length === 2 && a === 'emergencies') return { op: 'emergencies', params: {} };
   if (parts.length === 2 && a === 'health') return { op: 'health', params: {} };
@@ -106,25 +108,27 @@ export async function handle(request: Request, env: Env, ctx: Ctx, cache: CacheL
   const stub = env.GATE.get(env.GATE.idFromName('global'));
 
   if (route.op === 'health') {
-    const statsRes = await stub.fetch(`https://gate/stats`);
-    const s = (await statsRes.json()) as {
+    type Stats = {
       lastSuccess: number | null; lastError: string | null; lastErrorAt: number | null;
       requestsLastMinute: number; backoffUntil: number | null;
     };
-    const now = Date.now();
+    const [adsb, wx] = await Promise.all(
+      ['stats', 'weather-stats'].map(async (p) => (await (await stub.fetch(`https://gate/${p}`)).json()) as Stats),
+    );
+    const provider = (id: string, s: Stats) => ({
+      provider: id,
+      ok: s.backoffUntil === null && (s.lastErrorAt === null || (s.lastSuccess ?? 0) > s.lastErrorAt),
+      lastSuccess: s.lastSuccess,
+      lastError: s.lastError,
+      lastErrorAt: s.lastErrorAt,
+      requestsLastMinute: s.requestsLastMinute,
+      backoffUntil: s.backoffUntil,
+    });
     const body: HealthResponse = {
       service: 'skywake-api',
       version: env.VERSION ?? 'dev',
-      now,
-      providers: [{
-        provider: ADSBLOL_ID,
-        ok: s.backoffUntil === null && (s.lastErrorAt === null || (s.lastSuccess ?? 0) > s.lastErrorAt),
-        lastSuccess: s.lastSuccess,
-        lastError: s.lastError,
-        lastErrorAt: s.lastErrorAt,
-        requestsLastMinute: s.requestsLastMinute,
-        backoffUntil: s.backoffUntil,
-      }],
+      now: Date.now(),
+      providers: [provider(ADSBLOL_ID, adsb!), provider(AWC_ID, wx!)],
     };
     return withHeaders(new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } }), origin);
   }

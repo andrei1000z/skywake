@@ -2,6 +2,7 @@ import { isEmergency, routePlausible, type RouteInfo } from '@skywake/shared';
 import { useEffect, useState } from 'react';
 import { api } from '../data/api';
 import { liveStore } from '../data/liveStore';
+import { type Photo, photoFor } from '../data/photos';
 import { type MsgKey, t, useLang } from '../lib/i18n';
 import { getPrefs, setPrefs, usePrefs, type WatchItem } from '../lib/prefs';
 import { fmtAge, fmtAlt, fmtDeg, fmtSpeed, fmtVs } from '../lib/units';
@@ -27,6 +28,16 @@ export function AircraftPanel({ hex, following, onFollow, onClose, onShare }: {
   const ac = tracked?.ac;
   const callsign = ac?.callsign;
   const [route, setRoute] = useState<RouteState>({ status: 'none' });
+  const [photo, setPhoto] = useState<Photo | null>(null);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    setPhoto(null);
+    void photoFor(hex, ctrl.signal).then((p) => {
+      if (!ctrl.signal.aborted) setPhoto(p);
+    });
+    return () => ctrl.abort();
+  }, [hex]);
 
   useEffect(() => {
     if (!callsign) {
@@ -86,6 +97,15 @@ export function AircraftPanel({ hex, following, onFollow, onClose, onShare }: {
       }
       onClose={onClose}
     >
+      {photo && (
+        <figure className="ac-photo">
+          <a href={photo.link} target="_blank" rel="noopener">
+            <img src={photo.src} width={photo.width} height={photo.height} alt={t('photoAlt').replace('{reg}', ac.reg ?? ac.hex.toUpperCase())} loading="lazy" decoding="async" referrerPolicy="strict-origin-when-cross-origin" />
+          </a>
+          <figcaption>© {photo.photographer} · <a href={photo.link} target="_blank" rel="noopener">Planespotters.net</a></figcaption>
+        </figure>
+      )}
+
       <div className="ac-hero">
         <div>
           <div className="hero-label">{t('altitude')}</div>

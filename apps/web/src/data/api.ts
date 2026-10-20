@@ -1,4 +1,4 @@
-import type { AircraftListResponse, CellResponse, HealthResponse, RouteResponse } from '@skywake/shared';
+import type { AircraftListResponse, CellResponse, HealthResponse, MetarResponse, RouteResponse } from '@skywake/shared';
 
 /** Skywake API base URL. Set VITE_API_BASE at build time; dev falls back to a local `wrangler dev`. */
 export const API_BASE =
@@ -40,5 +40,6 @@ export const api = {
   search: (q: string, signal?: AbortSignal) => getJson<AircraftListResponse>(`/v1/search?q=${encodeURIComponent(q)}`, signal),
   emergencies: (signal?: AbortSignal) => getJson<AircraftListResponse>('/v1/emergencies', signal),
   route: (callsign: string, signal?: AbortSignal) => getJson<RouteResponse>(`/v1/route/${encodeURIComponent(callsign)}`, signal),
+  metar: (icao: string, signal?: AbortSignal) => getJson<MetarResponse>(`/v1/metar/${encodeURIComponent(icao)}`, signal),
   health: () => getJson<HealthResponse>('/v1/health'),
 };
