@@ -131,4 +131,8 @@ export const fr: Dict = {
   temperature: 'Temp. / point de rosée',
   clouds: 'Nuages',
   observed: 'Âge du message',
+  legFlown: 'parcourus',
+  legToGo: 'restants',
+  legEta: 'Arrivée',
+  legNote: 'Estimation orthodromique d’après l’itinéraire habituel et la vitesse actuelle.',
 };

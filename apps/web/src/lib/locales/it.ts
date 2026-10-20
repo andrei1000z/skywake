@@ -131,4 +131,8 @@ export const it: Dict = {
   temperature: 'Temp. / punto di rugiada',
   clouds: 'Nubi',
   observed: 'Età del bollettino',
+  legFlown: 'percorsi',
+  legToGo: 'rimanenti',
+  legEta: 'Arrivo',
+  legNote: 'Stima ortodromica basata sulla tratta abituale e sulla velocità attuale.',
 };

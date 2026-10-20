@@ -46,6 +46,16 @@ export function fmtAge(ms: number): string {
   return `${Math.floor(m / 60)}h ${m % 60}m`;
 }
 
+/** Distance in km, or nautical miles when the user flies in knots. */
+export function fmtDist(m: number, nm: boolean): string {
+  return nm ? `${nf0.format(m / 1852)} nm` : `${nf0.format(m / 1000)} km`;
+}
+
+export function fmtDuration(ms: number): string {
+  const min = Math.max(0, Math.round(ms / 60_000));
+  return min < 60 ? `${min} min` : `${Math.floor(min / 60)} h ${min % 60} min`;
+}
+
 /** METAR visibility (statute miles) in km; "6+" (≥ 6 SM) is the usual "10 km or more". */
 export function fmtVisibility(sm: number | undefined, plus?: boolean): string {
   if (sm === undefined) return '—';

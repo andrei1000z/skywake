@@ -18,6 +18,7 @@ Legend: **✅ Working** (implemented and covered by automated tests or verified 
 | Data | Route lookup + plausibility | ✅ | VRS standing data (CC0) |
 | Data | Flight history / playback | ⛔ | Needs storage and a data agreement (ODbL share-alike applies to stored DBs) |
 | Data | Scheduled arrivals / departures | ⛔ | No open schedule source with suitable licence found |
+| Data | Route progress + ETA | ✅ | Great-circle estimate on the matched leg, labelled as an estimate; unit tests; checked live |
 | Data | Aircraft photos | ✅ | Planespotters.net public API, called from the browser per their terms (credit + plain link); unit + e2e tests, checked live in Chromium. Android WebView not yet verified |
 | Data | Second provider (failover) | ⛔ | airplanes.live needs approval; OpenSky terms are non-commercial |
 | UI | Aircraft panel | ✅ | e2e |
@@ -35,5 +36,5 @@ Legend: **✅ Working** (implemented and covered by automated tests or verified 
 | Platform | i18n (EN, RO, DE, FR, ES, IT) | ✅ | Browser-language detection; e2e switches EN → RO → DE. DE/FR/ES/IT are AI-assisted translations awaiting native-speaker review |
 | Platform | Accessibility | ✅ | axe: no serious/critical violations in main views (e2e) |
 | Ops | CI (lint, types, tests, e2e, CodeQL, audit, secrets) | ✅ | Runs on GitHub Actions |
-| Ops | Public Worker deployment | ⛔ | Waiting on Cloudflare credentials (see PROGRESS.md) |
-| Ops | Public website | 🟡 | Pages workflow ready; live data needs the Worker URL |
+| Ops | Public Worker deployment | ✅ | skywake-api.andrei1000z.workers.dev, smoke-tested with live data; CI auto-deploy still needs a token secret |
+| Ops | Public website | 🟡 | Pages built against the live Worker; browser verification recorded in PROGRESS.md |

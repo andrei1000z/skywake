@@ -11,6 +11,7 @@ and versions follow [SemVer](https://semver.org/).
 - Search (callsign, registration, hex, airports), filters with presets, airport layer and panel, sortable list.
 - In-app alerts for emergency squawks and watched aircraft, with optional system notifications while open.
 - Light/dark themes, units, six languages (EN, RO, DE, FR, ES, IT) with browser-language detection, PWA install, Capacitor Android project.
+- Route progress bar with distance flown/to go and an estimated arrival time.
 - Aircraft photos from Planespotters.net with photographer credit; airport weather (METAR) from NOAA via the Worker.
 - Cloudflare Worker API with edge caching, a Durable Object request gate, coalescing, budgets, backoff and stale serving.
 - CI: lint, typecheck, unit tests, Playwright e2e with axe accessibility checks, CodeQL, dependency audit, secret scan.

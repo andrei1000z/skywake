@@ -1,11 +1,11 @@
-import { isEmergency, routePlausible, type RouteInfo } from '@skywake/shared';
+import { isEmergency, legProgress, routePlausible, type RouteInfo } from '@skywake/shared';
 import { useEffect, useState } from 'react';
 import { api } from '../data/api';
 import { liveStore } from '../data/liveStore';
 import { type Photo, photoFor } from '../data/photos';
 import { type MsgKey, t, useLang } from '../lib/i18n';
 import { getPrefs, setPrefs, usePrefs, type WatchItem } from '../lib/prefs';
-import { fmtAge, fmtAlt, fmtDeg, fmtSpeed, fmtVs } from '../lib/units';
+import { fmtAge, fmtAlt, fmtDeg, fmtDist, fmtDuration, fmtSpeed, fmtVs } from '../lib/units';
 import { aircraftRgb, cssRgb } from '../map/colors';
 import { useClock, useLiveTick } from './hooks';
 import { IconBell, IconLink, IconTarget } from './Icons';
@@ -145,6 +145,7 @@ export function AircraftPanel({ hex, following, onFollow, onClose, onShare }: {
                 </li>
               ))}
             </ol>
+            {!ac.onGround && <LegBar route={route.route} lat={ac.lat} lon={ac.lon} gs={ac.gs} now={now} speedUnit={u.speed} />}
             <p className="hint">{t('routeNote')}</p>
           </>
         ) : route.status === 'loading' ? (
@@ -172,5 +173,38 @@ export function AircraftPanel({ hex, following, onFollow, onClose, onShare }: {
       </dl>
       {prefs.trails && <p className="hint">{t('trail')}</p>}
     </Panel>
+  );
+}
+
+function LegBar({ route, lat, lon, gs, now, speedUnit }: { route: RouteInfo; lat: number; lon: number; gs?: number; now: number; speedUnit: string }) {
+  const p = legProgress(route.airports, lat, lon, gs);
+  if (!p) return null;
+  const from = route.airports[p.leg]!;
+  const to = route.airports[p.leg + 1]!;
+  const pct = Math.round(p.fraction * 100);
+  const nm = speedUnit === 'kt';
+  const arrival = p.etaMs === undefined ? null : new Date(now + p.etaMs).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return (
+    <div className="leg">
+      <div
+        className="leg-bar"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+        aria-label={`${from.iata ?? from.icao} → ${to.iata ?? to.icao}`}
+      >
+        <span className="leg-fill" style={{ width: `${pct}%` }} />
+        <span className="leg-plane" style={{ left: `${pct}%` }} aria-hidden="true">✈</span>
+      </div>
+      <div className="leg-meta">
+        <span>{fmtDist(p.flownM, nm)} {t('legFlown')}</span>
+        <span>
+          {fmtDist(p.remainingM, nm)} {t('legToGo')}
+          {arrival && p.etaMs !== undefined && <> · {t('legEta')} ≈ {arrival} ({fmtDuration(p.etaMs)})</>}
+        </span>
+      </div>
+      <p className="hint">{t('legNote')}</p>
+    </div>
   );
 }

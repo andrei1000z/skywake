@@ -131,4 +131,8 @@ export const de: Dict = {
   temperature: 'Temp. / Taupunkt',
   clouds: 'Wolken',
   observed: 'Alter der Meldung',
+  legFlown: 'geflogen',
+  legToGo: 'verbleibend',
+  legEta: 'Ankunft',
+  legNote: 'Großkreis-Schätzung aus der üblichen Route und der aktuellen Geschwindigkeit.',
 };

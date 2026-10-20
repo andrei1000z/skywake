@@ -131,4 +131,8 @@ export const es: Dict = {
   temperature: 'Temp. / punto de rocío',
   clouds: 'Nubes',
   observed: 'Antigüedad del informe',
+  legFlown: 'recorridos',
+  legToGo: 'restantes',
+  legEta: 'Llegada',
+  legNote: 'Estimación por ortodrómica a partir de la ruta habitual y la velocidad actual.',
 };

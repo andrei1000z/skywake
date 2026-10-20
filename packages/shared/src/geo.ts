@@ -61,3 +61,47 @@ export function routePlausible(airports: { lat?: number; lon?: number }[], lat: 
   }
   return false;
 }
+
+export interface LegProgress {
+  /** Index of the leg's origin in the airport list; the destination is `leg + 1`. */
+  leg: number;
+  flownM: number;
+  remainingM: number;
+  /** 0..1 along the leg. */
+  fraction: number;
+  /** Rough time to the leg's destination at the current ground speed (great circle, no approach). */
+  etaMs?: number;
+}
+
+/**
+ * Where an aircraft is along its (usual) route: picks the leg it fits best and measures great-circle
+ * distances. An estimate only; real flights don't fly great circles and routes can be wrong.
+ */
+export function legProgress(
+  airports: { lat?: number; lon?: number }[],
+  lat: number,
+  lon: number,
+  gsKt?: number,
+): LegProgress | null {
+  let best: { leg: number; excess: number; flown: number; remaining: number } | null = null;
+  for (let i = 0; i + 1 < airports.length; i++) {
+    const a = airports[i]!;
+    const b = airports[i + 1]!;
+    if (a.lat === undefined || a.lon === undefined || b.lat === undefined || b.lon === undefined) continue;
+    const flown = haversineM(a.lat, a.lon, lat, lon);
+    const remaining = haversineM(lat, lon, b.lat, b.lon);
+    const excess = flown + remaining - haversineM(a.lat, a.lon, b.lat, b.lon);
+    if (!best || excess < best.excess) best = { leg: i, excess, flown, remaining };
+  }
+  if (!best) return null;
+  const total = best.flown + best.remaining;
+  const out: LegProgress = {
+    leg: best.leg,
+    flownM: best.flown,
+    remainingM: best.remaining,
+    fraction: total > 0 ? best.flown / total : 0,
+  };
+  // Below ~60 kt the aircraft is taxiing or the speed is meaningless for an ETA.
+  if (gsKt !== undefined && gsKt >= 60) out.etaMs = (best.remaining / (gsKt * KT_TO_MS)) * 1000;
+  return out;
+}

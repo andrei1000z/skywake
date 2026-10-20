@@ -340,3 +340,10 @@ h1, h2, h3 { margin: 0; }
 .fltcat-mvfr { background: #2563eb; }
 .fltcat-ifr { background: #c2410c; }
 .fltcat-lifr { background: #a21caf; }
+
+/* Route leg progress */
+.leg { margin-top: 10px; }
+.leg-bar { position: relative; height: 6px; border-radius: 999px; background: var(--surface-2); margin: 12px 8px 6px; }
+.leg-fill { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--accent); }
+.leg-plane { position: absolute; top: 50%; transform: translate(-50%, -52%); font-size: 15px; line-height: 1; color: var(--accent); }
+.leg-meta { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 12.5px; }

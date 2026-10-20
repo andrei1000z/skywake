@@ -129,6 +129,10 @@ export const en = {
   temperature: 'Temp / dew point',
   clouds: 'Clouds',
   observed: 'Report age',
+  legFlown: 'flown',
+  legToGo: 'to go',
+  legEta: 'Arrival',
+  legNote: 'Great-circle estimate from the usual route and the current ground speed.',
 };
 
 export type MsgKey = keyof typeof en;

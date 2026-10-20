@@ -6,6 +6,9 @@ export default defineConfig({
   testDir: 'e2e',
   timeout: 45_000,
   retries: process.env.CI ? 1 : 0,
+  // The map renders with software WebGL (SwiftShader); several parallel browsers starve the CPU and
+  // make data-timing assertions fail. Two workers on CI runners, one locally (16 tests ≈ 1 min).
+  workers: process.env.CI ? 2 : 1,
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
   use: {
     baseURL: 'http://localhost:4173',

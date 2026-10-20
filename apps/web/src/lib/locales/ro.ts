@@ -131,4 +131,8 @@ export const ro: Dict = {
   temperature: 'Temp. / punct de rouă',
   clouds: 'Nori',
   observed: 'Vechime raport',
+  legFlown: 'parcurși',
+  legToGo: 'rămași',
+  legEta: 'Sosire',
+  legNote: 'Estimare pe ortodromă, din ruta obișnuită și viteza curentă.',
 };
