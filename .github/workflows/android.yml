@@ -97,7 +97,7 @@ jobs:
           "$BT/aapt2" dump badging out/*.apk | grep -E "^package|sdkVersion|targetSdkVersion|application-label:"
           unzip -l out/*.apk | grep -q "assets/public/index.html"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: skywake-apk-${{ steps.apk.outputs.kind }}
           path: out/*
