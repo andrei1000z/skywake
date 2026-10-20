@@ -1,0 +1,115 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    paths: ['apps/web/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Version from tag
+        id: ver
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF#refs/tags/v}"; else V="0.0.0-dev+${GITHUB_SHA::7}"; fi
+          IFS=. read -r MA MI PA <<< "${V%%[-+]*}"
+          echo "name=$V" >> "$GITHUB_OUTPUT"
+          echo "code=$(( MA * 10000 + MI * 100 + PA ))" >> "$GITHUB_OUTPUT"
+
+      - name: Build web bundle for the app
+        run: pnpm --filter @skywake/web build
+        env:
+          BASE_PATH: /
+          VITE_API_BASE: ${{ vars.SKYWAKE_API_BASE }}
+
+      - name: Sync Capacitor
+        run: pnpm --filter @skywake/web android:sync
+
+      - name: Decode signing key (only if configured)
+        id: sign
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            echo "path=$RUNNER_TEMP/release.jks" >> "$GITHUB_OUTPUT"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No signing key configured: building a debug-signed APK (not for store distribution)."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Gradle build
+        working-directory: apps/web/android
+        env:
+          SKYWAKE_VERSION_NAME: ${{ steps.ver.outputs.name }}
+          SKYWAKE_VERSION_CODE: ${{ steps.ver.outputs.code }}
+          ANDROID_KEYSTORE_PATH: ${{ steps.sign.outputs.path }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          if [ "${{ steps.sign.outputs.signed }}" = "true" ]; then ./gradlew --no-daemon assembleRelease; else ./gradlew --no-daemon assembleDebug; fi
+
+      - name: Collect APK + checksum
+        id: apk
+        run: |
+          mkdir -p out
+          KIND=$([ "${{ steps.sign.outputs.signed }}" = "true" ] && echo release || echo debug)
+          SRC=$(ls apps/web/android/app/build/outputs/apk/$KIND/*.apk | head -1)
+          NAME="skywake-${{ steps.ver.outputs.name }}-$KIND.apk"
+          NAME="${NAME//+/_}"
+          cp "$SRC" "out/$NAME"
+          (cd out && sha256sum "$NAME" > SHA256SUMS.txt && cat SHA256SUMS.txt)
+          echo "kind=$KIND" >> "$GITHUB_OUTPUT"
+
+      - name: Verify APK signature and contents
+        run: |
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify --print-certs out/*.apk | head -5
+          "$BT/aapt2" dump badging out/*.apk | grep -E "^package|sdkVersion|targetSdkVersion|application-label:"
+          unzip -l out/*.apk | grep -q "assets/public/index.html"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skywake-apk-${{ steps.apk.outputs.kind }}
+          path: out/*
+          retention-days: 30
+
+      - name: Publish GitHub release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+          prerelease: true
+          generate_release_notes: true
+          body: |
+            **Pre-release.** Not yet verified as production-ready. See PROGRESS.md for what has and hasn't been verified.
+            APK kind: `${{ steps.apk.outputs.kind }}`. Verify the download with `sha256sum -c SHA256SUMS.txt`.

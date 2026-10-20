@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.env*
+!.env.example
+coverage/
+test-results/
+playwright-report/
+apps/web/android/app/build/
+apps/web/android/.gradle/
+apps/web/android/local.properties
+*.keystore
+*.jks
+*.log
+
+# Capacitor-generated web copy
+apps/web/android/app/src/main/assets/public/
+apps/web/android/app/src/main/assets/capacitor.config.json
+apps/web/android/app/src/main/assets/capacitor.plugins.json
+scratch/

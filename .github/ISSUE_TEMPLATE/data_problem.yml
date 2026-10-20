@@ -1,0 +1,16 @@
+name: Wrong or missing data
+description: An aircraft, route or airport looks wrong
+labels: [data]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Skywake shows community data. Wrong routes usually need fixing in [VRS standing data](https://github.com/vradarserver/standing-data),
+        and coverage gaps need more [receivers feeding ADSB.lol](https://adsb.lol/feed). Tell us anyway: we may be able to detect it.
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong?
+      description: Include the callsign/hex/airport and a share link if possible.
+    validations:
+      required: true

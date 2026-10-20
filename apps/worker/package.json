@@ -1,0 +1,20 @@
+{
+  "name": "@skywake/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261019.1",
+    "wrangler": "^4.151.3"
+  },
+  "dependencies": {
+    "@skywake/shared": "workspace:*"
+  }
+}
