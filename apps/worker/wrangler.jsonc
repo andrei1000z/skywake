@@ -16,9 +16,9 @@
     // Exact browser origins allowed by CORS, comma separated (localhost and Capacitor are built in).
     "ALLOWED_ORIGINS": "https://andrei1000z.github.io",
     // Upstream budget for ADSB.lol, deliberately below its published per-IP limits (4/s, 60/min).
-    "UPSTREAM_RPS": "1",
+    "UPSTREAM_RPS": "0.75",
     "UPSTREAM_BURST": "3",
-    "UPSTREAM_PER_MIN": "50",
+    "UPSTREAM_PER_MIN": "40",
     "UPSTREAM_PER_DAY": "0",
     "USER_AGENT": "Skywake/0.1 (+https://github.com/andrei1000z/skywake)"
   }

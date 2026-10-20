@@ -14,6 +14,8 @@ export const MAX_EXTRAPOLATION_S = 20;
 /** Correction offsets blend out over this many seconds, so updates never teleport an icon. */
 export const CORRECTION_S = 1.2;
 const CELL_REFRESH_MS = 8_000;
+/** The gate allows 40 upstream calls a minute (1.5 s each), so wide views refresh each cell less often. */
+const PER_CELL_REFRESH_MS = 1_600;
 const CELL_CONCURRENCY = 4;
 const DROP_UNSEEN_MS = 45_000;
 const OUT_OF_VIEW_GRACE_MS = 30_000;
@@ -219,17 +221,26 @@ export class LiveStore {
     if (changed) this.emit();
   }
 
+  private refreshMs() {
+    return Math.max(CELL_REFRESH_MS, this.wanted.length * PER_CELL_REFRESH_MS);
+  }
+
   private pump() {
     if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
     this.prune();
     if (!this.online) return;
     const now = Date.now();
     let inflight = [...this.cells.values()].filter((c) => c.inflight).length;
-    for (const id of this.wanted) {
-      if (inflight >= CELL_CONCURRENCY) break;
+    const refresh = this.refreshMs();
+    // A stale answer means the gate was pacing upstream; such cells wait only for their retryAt.
+    const due = this.wanted.filter((id) => {
       const c = this.cells.get(id);
-      if (c?.inflight) continue;
-      if (c && (now - c.fetchedAt < CELL_REFRESH_MS || now < c.retryAt)) continue;
+      return !c || (!c.inflight && (c.stale || now - c.fetchedAt >= refresh) && now >= c.retryAt);
+    });
+    // Oldest data first (stable sort keeps the centre-first order among unloaded cells), so no cell starves.
+    due.sort((a, b) => (this.cells.get(a)?.snapshot ?? 0) - (this.cells.get(b)?.snapshot ?? 0));
+    for (const id of due) {
+      if (inflight >= CELL_CONCURRENCY) break;
       inflight++;
       void this.loadCell(id);
     }
@@ -247,13 +258,21 @@ export class LiveStore {
       c.snapshot = res.ts;
       c.stale = res.stale;
       c.failures = 0;
+      // Past the 2 s max-age the gate puts on stale answers, so the retry is not a browser-cache hit.
+      if (res.stale) c.retryAt = c.fetchedAt + 2500 + Math.random() * 1500;
       // Aircraft that left this cell's circle reappear via a neighbour; ones simply gone get pruned by age.
       this.ingest(res.aircraft);
       this.status.lastError = null;
     } catch (e) {
       if ((e as Error).name === 'AbortError') return;
-      c.failures++;
       const ra = e instanceof ApiError && e.retryAfter ? e.retryAfter * 1000 : 0;
+      if (e instanceof ApiError && e.code === 'rate_budget_exhausted') {
+        // Our own gate pacing a cold view (upstream is fine): queue a jittered retry, not a failure.
+        // Data that stays unrefreshed still turns the banner on through the age check below.
+        c.retryAt = Date.now() + Math.max(ra, 1000) + Math.random() * 1500;
+        return;
+      }
+      c.failures++;
       c.retryAt = Date.now() + Math.max(ra, Math.min(60_000, 2000 * 2 ** c.failures));
       this.status.lastError = e instanceof ApiError ? e.code : 'network';
     } finally {
@@ -267,11 +286,13 @@ export class LiveStore {
     let loaded = 0;
     let stale = false;
     let oldest: number | null = null;
+    const refresh = this.refreshMs();
     for (const id of this.wanted) {
       const c = this.cells.get(id);
       if (!c || c.fetchedAt === 0) continue;
       loaded++;
-      if (c.stale || Date.now() - c.fetchedAt > CELL_REFRESH_MS * 4) stale = true;
+      // The gate also marks cache hits served while it paces upstream as stale; those are seconds old.
+      if ((c.stale && Date.now() - c.snapshot > refresh * 3) || Date.now() - c.fetchedAt > refresh * 4) stale = true;
       oldest = oldest === null ? c.snapshot : Math.min(oldest, c.snapshot);
     }
     const anyFailing = this.wanted.some((id) => (this.cells.get(id)?.failures ?? 0) > 0);

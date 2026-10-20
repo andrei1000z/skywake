@@ -5,8 +5,9 @@ That only works as long as Skywake behaves well toward them.
 
 ## Upstream budget
 
-- By default Skywake makes 1 request per second, with bursts of up to 3 and a cap of 50 per minute. ADSB.lol publishes per-IP limits of 4 per second and 60 per minute.
-- Thanks to the shared cache and the fixed grid, cost does not grow with the number of users. It grows with the number of *distinct regions* being watched. About 8 cells can be kept fully fresh at once. Other regions refresh more slowly, and the UI shows how old the data is.
+- By default Skywake makes 0.75 requests per second, with bursts of up to 3 and a cap of 40 per minute. ADSB.lol publishes per-IP limits of 4 per second and 60 per minute. The margin matters because Cloudflare Workers reach the internet through shared egress IPs, so other services may count against the same per-IP limit. When ADSB.lol answers 429, the gate honours `Retry-After`, backs off exponentially and serves cached positions marked as stale.
+- The web client paces itself to that budget: each cell in view is refreshed about every `cells × 1.6 s` (at least 8 s), cells with the oldest data are fetched first, and the "delayed" banner only appears when data is genuinely older than that schedule allows.
+- Thanks to the shared cache and the fixed grid, cost does not grow with the number of users. It grows with the number of *distinct regions* being watched. About 5 cells can be kept fully fresh (8 s refresh) at once. Other regions refresh more slowly, and the UI shows how old the data is.
 - **Before any promotion** (press, app stores, social media), the maintainer will contact ADSB.lol to agree on capacity and attribution. Any agreement reached will be recorded here.
 
 ## Running costs

@@ -44,5 +44,5 @@ Without these secrets, CI builds a debug-signed APK and adds `-debug` to its nam
 
 ## Capacity
 
-By design, one deployment makes at most about 50 upstream requests per minute. Contact the data provider before
+By design, one deployment makes at most about 40 upstream requests per minute. Contact the data provider before
 promoting a public instance (see [SUSTAINABILITY.md](SUSTAINABILITY.md)).

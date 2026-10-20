@@ -80,7 +80,7 @@ If you plan meaningful traffic, **talk to the data provider first**. ADSB.lol as
 - **No history or playback yet.** Trails start when you open an aircraft.
 - **Routes come from a community callsign database** and can be wrong or outdated. Skywake flags routes that don't fit the aircraft's position, but cannot guarantee them.
 - **There are no push notifications when the app is closed.** Alerts work only while Skywake is open, because there is no push server.
-- **Shared capacity is limited.** Upstream requests are budgeted (about 50/min per deployment) out of respect for the volunteer service. With many users looking at different parts of the world, distant areas refresh more slowly. Scaling beyond that needs an agreement with the data provider. See [docs/SUSTAINABILITY.md](docs/SUSTAINABILITY.md).
+- **Shared capacity is limited.** Upstream requests are budgeted (about 40/min per deployment) out of respect for the volunteer service. With many users looking at different parts of the world, distant areas refresh more slowly. Scaling beyond that needs an agreement with the data provider. See [docs/SUSTAINABILITY.md](docs/SUSTAINABILITY.md).
 - **Some aircraft are hidden or anonymised upstream** at their owners' request (e.g. LADD/PIA).
 
 Skywake is not for navigation, safety-of-life or any operational aviation use.

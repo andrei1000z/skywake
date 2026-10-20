@@ -16,3 +16,7 @@ and versions follow [SemVer](https://semver.org/).
 - Cloudflare Worker API with edge caching, a Durable Object request gate, coalescing, budgets, backoff and stale serving.
 - CI: lint, typecheck, unit tests, Playwright e2e with axe accessibility checks, CodeQL, dependency audit, secret scan.
 - Workflows for GitHub Pages, Worker deploy, and Android APK builds with SHA-256 checksums and tag releases.
+
+### Changed
+- The client paces cell refreshes to the shared upstream budget and fetches the oldest cells first; the "delayed" banner now appears only when data is actually old.
+- Default upstream budget lowered to 0.75 req/s and 40/min to keep a margin under ADSB.lol's per-IP limits.

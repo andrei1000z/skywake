@@ -13,7 +13,7 @@ Cloudflare Worker (router.ts)
 Durable Object "UpstreamGate" (single global instance, gate-core.ts)
    ├─ in-memory cache (cell 10 s, hex 5 s, …) + stale copies up to 10 min
    ├─ request coalescing (identical in-flight requests share one fetch)
-   ├─ token bucket: 1 req/s, burst 3, 50/min (configurable, below ADSB.lol's 4/s and 60/min)
+   ├─ token bucket: 0.75 req/s, burst 3, 40/min (configurable, below ADSB.lol's 4/s and 60/min)
    ├─ backoff on 429/5xx honouring Retry-After; 8 s timeout
    ▼
 ADSB.lol  /v2/point/{lat}/{lon}/{radius}

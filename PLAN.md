@@ -29,7 +29,7 @@ It is built only on openly licensed data and is careful with the volunteer servi
 
 | Risk | Mitigation |
 |---|---|
-| Upstream capacity (≈50 req/min budget per deployment) | Grid-aligned shared cache, coalescing, stale serving; contact ADSB.lol before promotion; document clearly |
+| Upstream capacity (≈40 req/min budget per deployment) | Grid-aligned shared cache, coalescing, stale serving; contact ADSB.lol before promotion; document clearly |
 | Provider outage | Stale serving with clear banner; second provider only once properly licensed |
 | Tile host policy changes | OpenFreeMap requires no key; style URLs are in one place and easy to swap |
 | WebGL2 unavailable | Clear message instead of a broken map |

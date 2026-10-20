@@ -16,9 +16,9 @@ export class UpstreamGate extends DurableObject<Env> {
     const n = (v: string | undefined, d: number) => (v && Number.isFinite(Number(v)) ? Number(v) : d);
     this.core = new GateCore(
       {
-        rps: n(env.UPSTREAM_RPS, 1),
+        rps: n(env.UPSTREAM_RPS, 0.75),
         burst: n(env.UPSTREAM_BURST, 3),
-        perMinute: n(env.UPSTREAM_PER_MIN, 50),
+        perMinute: n(env.UPSTREAM_PER_MIN, 40),
         perDay: n(env.UPSTREAM_PER_DAY, 0),
       },
       fetch.bind(globalThis),
