@@ -11,8 +11,8 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261019.1",
-    "wrangler": "^4.151.3"
+    "@cloudflare/workers-types": "^5.20261031.1",
+    "wrangler": "^4.156.0"
   },
   "dependencies": {
     "@skywake/shared": "workspace:*"
